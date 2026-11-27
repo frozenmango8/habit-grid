@@ -68,17 +68,8 @@ function draw() {
 
   document.querySelectorAll<HTMLElement>('[data-scroll]').forEach((node) => {
     const saved = node.dataset.scroll ? scrolls.get(node.dataset.scroll) : undefined;
-    if (saved !== undefined) {
-      node.scrollLeft = saved;
-      return;
-    }
-    const today = todayIso();
-    const exact = node.querySelector<HTMLElement>(`[data-date="${today}"]`);
-    const cells = node.querySelectorAll<HTMLElement>('.cell:not(:disabled)');
-    const cell = exact ?? (cells.length > 0 ? cells[cells.length - 1] : null);
-    if (!cell) return;
-    const delta = cell.getBoundingClientRect().right - node.getBoundingClientRect().right + 12;
-    if (delta > 0) node.scrollLeft += delta;
+    if (saved !== undefined) node.scrollLeft = saved;
+    else revealRecent(node);
   });
   window.scrollTo(0, y);
 
@@ -87,6 +78,23 @@ function draw() {
   if (!next) return;
   next.focus({ preventScroll: !explicit });
   if (explicit && next instanceof HTMLInputElement && next.dataset.action === 'rename') next.select();
+}
+
+function recentCell(node: HTMLElement): HTMLElement | null {
+  const exact = node.querySelector<HTMLElement>(`[data-date="${todayIso()}"]`);
+  if (exact) return exact;
+  const cells = node.querySelectorAll<HTMLElement>('.cell:not(:disabled)');
+  return cells.length > 0 ? cells[cells.length - 1] : null;
+}
+
+function revealRecent(node: HTMLElement) {
+  const cell = recentCell(node);
+  if (!cell) return;
+  const cellBox = cell.getBoundingClientRect();
+  const box = node.getBoundingClientRect();
+  if (cellBox.width === 0 || box.width === 0) return;
+  if (cellBox.left >= box.left && cellBox.right <= box.right) return;
+  node.scrollLeft += cellBox.right - box.right + 12;
 }
 
 function drawNow() {
@@ -454,6 +462,13 @@ app.addEventListener('keydown', onKeyDown);
 
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
   if (state.settings.theme === 'system') applyTheme('system');
+});
+
+window.addEventListener('resize', () => {
+  document.querySelectorAll<HTMLElement>('[data-scroll]').forEach((node) => {
+    if (node.scrollLeft !== 0) return;
+    revealRecent(node);
+  });
 });
 
 draw();
