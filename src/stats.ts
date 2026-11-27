@@ -197,14 +197,15 @@ export function summarize(
   const recentFrom = addDays(today, -29);
   const yearFrom = isoDate(year, 1, 1);
   const yearTo = isoDate(year, 12, 31);
+  // Rates cover the whole window. Days before the habit existed still count as missed.
   const recent =
     habit.mode === 'weekly'
-      ? weeklyCompletion(habit.log, habit.target, recentFrom, today, today, start, weekStartsOn)
-      : dailyCompletion(habit.log, habit.target, recentFrom, today, today, start);
+      ? weeklyCompletion(habit.log, habit.target, recentFrom, today, today, recentFrom, weekStartsOn)
+      : dailyCompletion(habit.log, habit.target, recentFrom, today, today, recentFrom);
   const yearRatio =
     habit.mode === 'weekly'
-      ? weeklyCompletion(habit.log, habit.target, yearFrom, yearTo, today, start, weekStartsOn)
-      : dailyCompletion(habit.log, habit.target, yearFrom, yearTo, today, start);
+      ? weeklyCompletion(habit.log, habit.target, yearFrom, yearTo, today, yearFrom, weekStartsOn)
+      : dailyCompletion(habit.log, habit.target, yearFrom, yearTo, today, yearFrom);
 
   return { current: streaks.current, longest: streaks.longest, recent, year: yearRatio };
 }

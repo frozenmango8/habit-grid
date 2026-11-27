@@ -183,6 +183,17 @@ describe('summaries', () => {
     expect(habitStart(item)).toBe('2026-05-01');
   });
 
+  it('counts missed days in the last 30 and in the year, even before the habit was added', () => {
+    const item = habit({
+      createdOn: '2026-11-27',
+      log: { '2026-11-27': 1 },
+    });
+    const summary = summarize(item, '2026-11-27', 2026, 0);
+    expect(summary.current).toBe(1);
+    expect(summary.recent).toEqual({ met: 1, total: 30 });
+    expect(summary.year).toEqual({ met: 1, total: 331 });
+  });
+
   it('summarizes the open streak, the last 30 days, and the selected year', () => {
     const item = habit({
       createdOn: '2020-01-01',
