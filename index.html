@@ -1,9 +1,31 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Habit grid</title>
+    <meta name="description" content="A year-long grid for each habit.">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <script>
+      (function () {
+        var choice = "system";
+        try {
+          var raw = localStorage.getItem("habit-grid");
+          var theme = raw && JSON.parse(raw).settings.theme;
+          if (theme === "light" || theme === "dark" || theme === "system") choice = theme;
+        } catch (error) {
+          choice = "system";
+        }
+        var dark =
+          choice === "dark" ||
+          (choice === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+      })();
+    </script>
+    <style>
+      html { background: #e4dfd4; }
+      html[data-theme="dark"] { background: #141311; color-scheme: dark; }
+    </style>
   </head>
   <body>
     <div id="app"></div>
